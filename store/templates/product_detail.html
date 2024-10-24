@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load cart %}  <!-- Load custom cart filters -->
+{% load custom_filter %}
+
+{% block content %}  <!-- Added block content -->
+
+<style>
+    .quantity-container {
+        display: flex;
+        align-items: center; /* Center align items */
+        margin-bottom: 10px; /* Space below the quantity section */
+    }
+    
+    .quantity-container label {
+        margin-right: 10px; /* Space between label and input */
+        font-weight: bold; /* Make label bold */
+    }
+    
+    .quantity-container input[type="number"] {
+        width: 60px; /* Set width of the quantity input */
+        padding: 5px; /* Padding inside the input */
+        border: 1px solid #ced4da; /* Border styling */
+        border-radius: 4px; /* Rounded corners */
+        margin-right: 10px; /* Space between input and button */
+    }
+
+    .btn-light {
+        background-color: #f8f9fa; /* Background color */
+        color: #212529; /* Text color */
+        border: 1px solid #ced4da; /* Border styling */
+        border-radius: 4px; /* Rounded corners */
+        padding: 10px 15px; /* Padding for button */
+        transition: background-color 0.3s ease; /* Smooth transition */
+    }
+
+    .btn-light:hover {
+        background-color: #e2e6ea; /* Hover background color */
+    }
+
+    .cart-info {
+        margin-top: 10px; /* Space above cart info */
+        font-size: 16px; /* Font size for cart info */
+        color: #6c757d; /* Text color */
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="row">
+        <!-- Categories Sidebar -->
+        <div class="col-lg-3">
+            <h2 class="h3 text-center">Categories</h2>
+            <div class="list-group">
+                <a href="/" class="list-group-item list-group-item-action active">All Products</a>
+            </div>
+            {% for category in categories %}
+            <div class="list-group">
+                <a href="/?category={{category.id}}" class="list-group-item list-group-item-action">{{category.name}}</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Product Details -->
+        <div class="col-lg-9">
+            <div class="row">
+                <div class="col-md-6">
+                    <img src="{{ product.image.url }}" class="img-fluid" alt="{{ product.name }}">
+                </div>
+                <div class="col-md-6">
+                    <h1>{{ product.name }}</h1>
+                    <p>{{ product.description }}</p>
+                    <h3>$ {{ product.price|floatformat:2 }}</h3>
+
+                    <!-- Add to Cart Form -->
+                    <form action="{% url 'product_detail' product.id %}" method="POST" class="btn-block mb-2">
+                        {% csrf_token %}
+                        <input type="hidden" name='product' value='{{product.id}}'>
+                        <div class="quantity-container">
+                            <label for="quantity">Quantity:</label>
+                            <input type="number" name="quantity" id="quantity" value="1" min="1" class="form-control">
+                        </div>
+                        <input type="submit" class="btn btn-light form-control" value="Add To Cart">
+                    </form>
+
+                    <!-- Cart Display -->
+                    <div class="text-center cart-info">
+                        {% if product|cart_quantity:request.session.cart %}
+                        <p>{{ product|cart_quantity:request.session.cart }} in Cart</p>
+                        {% else %}
+                        <p>0 in Cart</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Recommendations -->
+            <div class="mt-5">
+                <h3>Recommended Products</h3>
+                <div class="row">
+                    {% for recommendation in recommendations %}
+                    <div class="col-md-3">
+                        <div class="card">
+                            <a href="{% url 'product_detail' recommendation.id %}" class="stretched-link">
+                                <img src="{{ recommendation.image.url }}" class="card-img-top" alt="{{ recommendation.name }}">
+                            </a>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ recommendation.name }}</h5>
+                                <p class="card-text">$ {{ recommendation.price|floatformat:2 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

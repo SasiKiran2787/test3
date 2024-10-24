@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load cart %}
+{% load custom_filter %}
+
+<div class="container">
+    <div class="border rounded p-4 m-4">
+        <p class="display-4 pl-4 ml-4">Your Cart</p>
+        <hr>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Sno.</th>
+                    <th>Image</th>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td><img style="height: 80px;" class="rounded-circle" src="{{ product.image.url }}" alt="{{ product.name }}"></td>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.price|currency }}</td>
+                    <td>{{ product|cart_quantity:request.session.cart }}</td>
+                    <td>{{ product|price_total:request.session.cart|currency }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="4"></th>
+                    <th>Total</th>
+                    <th>{{ products|total_cart_price:request.session.cart|currency }}</th>
+                </tr>
+            </tfoot>
+        </table>
+        <hr>
+        <div class="m-3 p-3">
+            <a href="#" data-toggle="modal" data-target="#checkoutModal" class="btn btn-outline-info border rounded col-lg-3 float-right">Check out</a>
+        </div>
+    </div>
+</div>
+
+<!-- Checkout Modal -->
+<div class="modal fade" id="checkoutModal" tabindex="-1" role="dialog" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="checkoutModalLabel">Check Out Form</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="m-2 p-3">
+                    <form action="/check-out" method="POST" id="checkoutForm" onsubmit="return handleSubmit(event);">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <input type="text" name="address" class="form-control" placeholder="Enter your address" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone</label>
+                            <input type="tel" name="phone" class="form-control" placeholder="Enter your phone number" required pattern="[0-9]{10}" title="Please enter a 10-digit phone number">
+                        </div>
+                        <div class="form-group">
+                            <label for="paymentMethod">Payment Method</label>
+                            <select name="payment_method" class="form-control" id="paymentMethod" required>
+                                <option value="cod">Cash on Delivery</option>
+                                <option value="online">Online Payment</option>
+                            </select>
+                        </div>
+                        <input type="submit" class="btn float-right btn-outline-info col-lg-6" value="Check out">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function handleSubmit(event) {
+        const paymentMethod = document.getElementById('paymentMethod').value;
+        if (paymentMethod === 'online') {
+            event.preventDefault(); // Prevent the form from submitting immediately
+            $('#dummyPaymentModal').modal('show'); // Show the dummy payment modal
+            
+            // Simulate a delay (optional)
+            setTimeout(function() {
+                $('#dummyPaymentModal').modal('hide'); // Hide the dummy payment modal
+                // Show a success alert for online payment
+                document.getElementById('checkoutForm').submit(); // Submit the original form after the delay
+            }, 30); // 3 seconds delay
+            return false; // Prevent the form from submitting
+        } else if (paymentMethod === 'cod') {
+            alert('Order placed successfully!'); // Show a success alert for COD
+            return true; // Allow form submission for COD
+        }
+        return true; // Allow form submission for other payment methods
+    }
+</script>
+
+
+{% endblock %}

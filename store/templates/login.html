@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% load static %}
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Website</title>
+
+  <!-- Link the CSS files -->
+  <link rel="stylesheet" href="{% static '/css/login.css' %}">
+  <link rel="stylesheet" href="{% static '/css/forms.css' %}">
+
+  <!-- Other CSS files -->
+</head>
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center">Login Account</h2>
+    <div class="p-4 m-4 col-lg-5 mx-auto border rounded">
+        <form method="POST" action="/login">
+            {% csrf_token %}
+            {% if error %}
+            <div class="alert alert-danger" role="alert">
+                {{error}}
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+              <label for="email">Email address</label>
+              <input type="email" class="form-control" id="email" name="email" value="{{values.email}}">
+            </div>
+
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input type="password" class="form-control" id="password" name="password">
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
